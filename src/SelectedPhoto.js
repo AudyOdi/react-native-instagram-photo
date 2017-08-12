@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from 'react';
-import {View, Animated, PanResponder} from 'react-native';
+import {View, Animated, PanResponder, Easing} from 'react-native';
 
 type Props = {
   selectedPhotoMeasurement: {x: number; y: number; w: number; h: number};
@@ -90,7 +90,29 @@ export default class SelectedPhoto extends Component {
         {dx: this.gesturePosition.x, dy: this.gesturePosition.y},
       ]),
       onPanResponderRelease: () => {
-        this.setState({isDragging: false});
+        Animated.parallel([
+          Animated.timing(this.gesturePosition.x, {
+            toValue: 0,
+            duration: 400,
+            easing: Easing.ease,
+          }),
+          Animated.timing(this.gesturePosition.y, {
+            toValue: 0,
+            duration: 400,
+            easing: Easing.ease,
+          }),
+        ]).start(() => {
+          this.gesturePosition.setOffset({
+            x: 0,
+            y: selectedPhotoMeasurement.y - scrollValue.y,
+          });
+          this.setState({isDragging: false});
+        });
+
+        // this.gesturePosition.setOffset({
+        //   x: 0,
+        //   y: selectedPhotoMeasurement.y - scrollValue.y,
+        // });
       },
     });
   }
