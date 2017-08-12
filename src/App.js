@@ -3,11 +3,12 @@ import React from 'react';
 import {StyleSheet, View, ScrollView, Animated} from 'react-native';
 
 import Photo from './Photo';
+import SelectedPhoto from './SelectedPhoto';
 
 let photos = ['1', '2', '3', '4', '5'];
 
 type State = {
-  selectedPhotoPosition?: Object;
+  selectedPhotoMeasurement?: Object;
 };
 
 export default class App extends React.Component {
@@ -22,7 +23,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    let {selectedPhotoPosition} = this.state;
+    let {selectedPhotoMeasurement} = this.state;
     let onScroll = Animated.event([
       {nativeEvent: {contentOffset: {y: this.scrollValue}}},
     ]);
@@ -35,28 +36,17 @@ export default class App extends React.Component {
               <Photo
                 photo={photo}
                 key={key}
-                onPress={(position: Object) => {
-                  this.setState({selectedPhotoPosition: position});
+                onPress={(measurement: Object) => {
+                  this.setState({selectedPhotoMeasurement: measurement});
                 }}
               />
             );
           })}
         </ScrollView>
-        {selectedPhotoPosition
-          ? <View
-            style={{
-              position: 'absolute',
-              zIndex: 100,
-              width: selectedPhotoPosition.w,
-              height: selectedPhotoPosition.h,
-              backgroundColor: 'blue',
-              transform: [
-                {
-                  translateY:
-                      selectedPhotoPosition.y - this.scrollValue.__getValue(),
-                },
-              ],
-            }}
+        {selectedPhotoMeasurement
+          ? <SelectedPhoto
+            selectedPhotoMeasurement={selectedPhotoMeasurement}
+            scrollValue={{y: this.scrollValue.__getValue()}}
           />
           : null}
       </View>
