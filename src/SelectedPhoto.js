@@ -1,27 +1,35 @@
 // @flow
 
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {Animated} from 'react-native';
 
 import type {Measurement} from './Measurement-type';
 
 type Props = {
   selectedPhotoMeasurement: ?Measurement;
-  scaleValue: Animated.Value;
   isDragging: boolean;
+};
+
+type Context = {
   gesturePosition: Animated.ValueXY;
+  scaleValue: Animated.Value;
 };
 
 export default class SelectedPhoto extends Component {
   props: Props;
+  context: Context;
+
+  static contextTypes = {
+    gesturePosition: PropTypes.object,
+    scrollValue: PropTypes.object,
+    scaleValue: PropTypes.object,
+  };
 
   render() {
-    let {
-      selectedPhotoMeasurement,
-      gesturePosition,
-      scaleValue,
-      isDragging,
-    } = this.props;
+    let {selectedPhotoMeasurement, isDragging} = this.props;
+
+    let {gesturePosition, scaleValue} = this.context;
 
     if (selectedPhotoMeasurement == null || !isDragging) {
       return null;

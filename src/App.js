@@ -1,5 +1,6 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 import {StyleSheet, View, ScrollView, Animated} from 'react-native';
 
 import Photo from './Photo';
@@ -31,6 +32,20 @@ export default class App extends React.Component {
     };
   }
 
+  static childContextTypes = {
+    gesturePosition: PropTypes.object,
+    scrollValue: PropTypes.object,
+    scaleValue: PropTypes.object,
+  };
+
+  getChildContext() {
+    return {
+      gesturePosition: this._gesturePosition,
+      scaleValue: this._scaleValue,
+      scrollValue: this._scrollValue,
+    };
+  }
+
   render() {
     let {isDragging, selectedPhotoMeasurement} = this.state;
     let onScroll = Animated.event([
@@ -56,9 +71,6 @@ export default class App extends React.Component {
                   });
                 }}
                 onGestureRelease={() => this.setState({isDragging: false})}
-                gesturePosition={this._gesturePosition}
-                scrollValue={this._scrollValue}
-                scaleValue={this._scaleValue}
               />
             );
           })}
@@ -66,8 +78,6 @@ export default class App extends React.Component {
         {selectedPhotoMeasurement
           ? <SelectedPhoto
             selectedPhotoMeasurement={selectedPhotoMeasurement}
-            gesturePosition={this._gesturePosition}
-            scaleValue={this._scaleValue}
             isDragging={isDragging}
           />
           : null}

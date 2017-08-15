@@ -1,6 +1,7 @@
 // @flow
 
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import autobind from 'class-autobind';
 import ReactNative, {
   View,
@@ -29,12 +30,15 @@ type Event = {
 
 type Props = {
   photo: string;
-  gesturePosition: Animated.ValueXY;
-  scrollValue: Animated.Value;
-  scaleValue: Animated.Value;
   style?: Object;
   onGestureStart: (measurement: Measurement) => void;
   onGestureRelease: () => void;
+};
+
+type Context = {
+  gesturePosition: Animated.ValueXY;
+  scaleValue: Animated.Value;
+  scrollValue: Animated.Value;
 };
 
 type State = {
@@ -44,6 +48,7 @@ type State = {
 export default class Photo extends Component {
   props: Props;
   state: State;
+  context: Context;
   _parent: ?Object;
   _photoComponent: ?Object;
   _gestureHandler: Object;
@@ -55,11 +60,17 @@ export default class Photo extends Component {
     super(...arguments);
     autobind(this);
     this._previousDistance = 0;
-    this._generatePanHandlers(this.props.scrollValue);
+    this._generatePanHandlers(this.context.scrollValue);
     this.state = {
       isDragging: false,
     };
   }
+
+  static contextTypes = {
+    gesturePosition: PropTypes.object,
+    scrollValue: PropTypes.object,
+    scaleValue: PropTypes.object,
+  };
 
   render() {
     let {photo, style} = this.props;
@@ -102,7 +113,8 @@ export default class Photo extends Component {
   }
 
   _generatePanHandlers(scrollValue) {
-    let {gesturePosition, onGestureStart} = this.props;
+    let {onGestureStart} = this.props;
+    let {gesturePosition} = this.context;
 
     this._gestureHandler = PanResponder.create({
       // eslint-disable-next-line no-unused-vars
@@ -171,7 +183,7 @@ export default class Photo extends Component {
   _onGestureMove(event: Event, gestureState: {dx: number; dy: number}) {
     let {touches} = event.nativeEvent;
     if (touches.length === 2) {
-      let {gesturePosition, scaleValue} = this.props;
+      let {gesturePosition, scaleValue} = this.context;
       let {dx, dy} = gestureState;
       gesturePosition.x.setValue(dx);
       gesturePosition.y.setValue(dy);
@@ -190,12 +202,8 @@ export default class Photo extends Component {
     }
   }
   _onGestureRelease() {
-    let {
-      gesturePosition,
-      scaleValue,
-      scrollValue,
-      onGestureRelease,
-    } = this.props;
+    let {onGestureRelease} = this.props;
+    let {gesturePosition, scaleValue, scrollValue} = this.context;
     Animated.parallel([
       Animated.timing(gesturePosition.x, {
         toValue: 0,
