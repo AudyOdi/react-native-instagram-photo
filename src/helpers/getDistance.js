@@ -1,6 +1,6 @@
 // @flow
 
-import type {Touch} from '../SelectedPhoto';
+import type {Touch} from '../Touch-type';
 
 export function pow2abs(a: number, b: number) {
   return Math.pow(Math.abs(a - b), 2);

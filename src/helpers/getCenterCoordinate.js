@@ -1,6 +1,6 @@
 // @flow
 
-import type {Touch} from '../SelectedPhoto';
+import type {Touch} from '../Touch-type';
 
 export default function getCenterCoordinate(touches: Array<Touch>) {
   const a = touches[0];

@@ -5,40 +5,60 @@ import {StyleSheet, View, ScrollView, Animated} from 'react-native';
 import Photo from './Photo';
 import SelectedPhoto from './SelectedPhoto';
 
+import type {Measurement} from './Measurement-type';
+
 let photos = ['1', '2', '3', '4', '5'];
 
 type State = {
-  selectedPhotoMeasurement?: Object;
+  selectedPhotoMeasurement?: Measurement;
+  isDragging: boolean;
 };
 
 export default class App extends React.Component {
   state: State;
-  scrollValue: Animated.Value;
+  _scrollValue: Animated.Value;
+  _scaleValue: Animated.Value;
+  _gesturePosition: Animated.ValueXY;
 
   constructor() {
     super(...arguments);
 
-    this.scrollValue = new Animated.Value(0);
-    this.state = {};
+    this._scrollValue = new Animated.Value(0);
+    this._scaleValue = new Animated.Value(1);
+    this._gesturePosition = new Animated.ValueXY();
+    this.state = {
+      isDragging: false,
+    };
   }
 
   render() {
-    let {selectedPhotoMeasurement} = this.state;
+    let {isDragging, selectedPhotoMeasurement} = this.state;
     let onScroll = Animated.event([
-      {nativeEvent: {contentOffset: {y: this.scrollValue}}},
+      {nativeEvent: {contentOffset: {y: this._scrollValue}}},
     ]);
 
     return (
       <View style={styles.container}>
-        <ScrollView scrollEventThrottle={16} onScroll={onScroll}>
+        <ScrollView
+          scrollEventThrottle={16}
+          onScroll={onScroll}
+          scrollEnabled={!isDragging}
+        >
           {photos.map((photo, key) => {
             return (
               <Photo
                 photo={photo}
                 key={key}
-                onPress={(measurement: Object) => {
-                  this.setState({selectedPhotoMeasurement: measurement});
+                onGestureStart={(measurement: Measurement) => {
+                  this.setState({
+                    selectedPhotoMeasurement: measurement,
+                    isDragging: true,
+                  });
                 }}
+                onGestureRelease={() => this.setState({isDragging: false})}
+                gesturePosition={this._gesturePosition}
+                scrollValue={this._scrollValue}
+                scaleValue={this._scaleValue}
               />
             );
           })}
@@ -46,7 +66,9 @@ export default class App extends React.Component {
         {selectedPhotoMeasurement
           ? <SelectedPhoto
             selectedPhotoMeasurement={selectedPhotoMeasurement}
-            scrollValue={{y: this.scrollValue.__getValue()}}
+            gesturePosition={this._gesturePosition}
+            scaleValue={this._scaleValue}
+            isDragging={isDragging}
           />
           : null}
       </View>
