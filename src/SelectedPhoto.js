@@ -7,8 +7,7 @@ import {Animated} from 'react-native';
 import type {Measurement} from './Measurement-type';
 
 type Props = {
-  selectedPhotoMeasurement: ?Measurement;
-  isDragging: boolean;
+  selectedPhoto: {photoURI: string; measurement: Measurement};
 };
 
 type Context = {
@@ -27,13 +26,9 @@ export default class SelectedPhoto extends Component {
   };
 
   render() {
-    let {selectedPhotoMeasurement, isDragging} = this.props;
+    let {selectedPhoto} = this.props;
 
     let {gesturePosition, scaleValue} = this.context;
-
-    if (selectedPhotoMeasurement == null || !isDragging) {
-      return null;
-    }
 
     let animatedStyle = {
       transform: gesturePosition.getTranslateTransform(),
@@ -45,14 +40,20 @@ export default class SelectedPhoto extends Component {
     let style = [
       {
         position: 'absolute',
-        zIndex: 100,
-        width: selectedPhotoMeasurement.w,
-        height: selectedPhotoMeasurement.h,
-        backgroundColor: 'blue',
+        zIndex: 10,
+        width: selectedPhoto.measurement.w,
+        height: selectedPhoto.measurement.h,
       },
       animatedStyle,
     ];
 
-    return <Animated.View style={style} />;
+    return (
+      <Animated.Image
+        style={style}
+        source={{
+          uri: selectedPhoto.photoURI,
+        }}
+      />
+    );
   }
 }
