@@ -109,10 +109,13 @@ export default class PhotoComponent extends Component {
 
   _generatePanHandlers() {
     this._gestureHandler = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetResponderCapture: () => true,
+      onMoveShouldSetPanResponderCapture: (event: Event) => {
+        if (event.nativeEvent.touches.length === 2) {
+          return true;
+        }
+        return false;
+      },
       onPanResponderGrant: this._startGesture,
       onPanResponderMove: this._onGestureMove,
       onPanResponderRelease: this._onGestureRelease,
