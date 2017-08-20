@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Animated} from 'react-native';
+import {Animated, StyleSheet} from 'react-native';
 
 import type {Measurement} from './Measurement-type';
 
@@ -47,13 +47,38 @@ export default class SelectedPhoto extends Component {
       animatedStyle,
     ];
 
+    let backgroundColor = scaleValue.interpolate({
+      inputRange: [1.2, 2.5],
+      outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)'],
+    });
+
     return (
-      <Animated.Image
-        style={style}
-        source={{
-          uri: selectedPhoto.photoURI,
-        }}
-      />
+      <Animated.View
+        style={[
+          styles.root,
+          {
+            backgroundColor,
+          },
+        ]}
+      >
+        <Animated.Image
+          style={style}
+          source={{
+            uri: selectedPhoto.photoURI,
+          }}
+        />
+      </Animated.View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+});
