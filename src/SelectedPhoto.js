@@ -2,12 +2,16 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Animated, StyleSheet} from 'react-native';
+import {View, Animated, StyleSheet} from 'react-native';
 
 import type {Measurement} from './Measurement-type';
 
 type Props = {
   selectedPhoto: {photoURI: string; measurement: Measurement};
+};
+
+type State = {
+  isLoaded: boolean;
 };
 
 type Context = {
@@ -17,6 +21,7 @@ type Context = {
 
 export default class SelectedPhoto extends Component {
   props: Props;
+  state: State = {isLoaded: false};
   context: Context;
 
   static contextTypes = {
@@ -27,6 +32,7 @@ export default class SelectedPhoto extends Component {
 
   render() {
     let {selectedPhoto} = this.props;
+    let {isLoaded} = this.state;
 
     let {gesturePosition, scaleValue} = this.context;
 
@@ -37,37 +43,40 @@ export default class SelectedPhoto extends Component {
       scale: scaleValue,
     });
 
-    let style = [
+    let imageStyle = [
       {
         position: 'absolute',
         zIndex: 10,
         width: selectedPhoto.measurement.w,
         height: selectedPhoto.measurement.h,
+        opacity: isLoaded ? 1 : 0,
       },
       animatedStyle,
     ];
 
-    let backgroundColor = scaleValue.interpolate({
+    let opacityValue = scaleValue.interpolate({
       inputRange: [1.2, 2.5],
-      outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)'],
+      outputRange: [0, 0.6],
     });
 
     return (
-      <Animated.View
-        style={[
-          styles.root,
-          {
-            backgroundColor,
-          },
-        ]}
-      >
+      <View style={styles.root}>
+        <Animated.View
+          style={[
+            styles.backdrop,
+            {
+              opacity: opacityValue,
+            },
+          ]}
+        />
         <Animated.Image
-          style={style}
+          style={imageStyle}
+          onLoad={() => this.setState({isLoaded: true})}
           source={{
             uri: selectedPhoto.photoURI,
           }}
         />
-      </Animated.View>
+      </View>
     );
   }
 }
@@ -80,5 +89,13 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    backgroundColor: 'black',
   },
 });

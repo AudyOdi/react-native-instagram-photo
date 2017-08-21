@@ -26,7 +26,8 @@ let photos = [
       uri: `https://cdn-images-1.medium.com/fit/c/200/200/0*fGMlNbNmb01G7gpv.jpeg`,
     },
     photo: {
-      uri: 'https://pbs.twimg.com/media/DCWuHpfW0AEII0C.jpg',
+      uri:
+        'https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F32179220%2F214666330784%2F1%2Foriginal.jpg?w=1000&rect=357%2C293%2C2326%2C1163&s=6ccee5095fbfd4a7b9aead2c2d355e3d',
     },
   },
   {
@@ -118,6 +119,7 @@ export default class App extends React.Component {
               <Photo
                 data={photo}
                 key={key}
+                isDragging={isDragging}
                 onGestureStart={(selectedPhoto: SelectedPhotoType) => {
                   this.setState({
                     selectedPhoto,
@@ -129,7 +131,12 @@ export default class App extends React.Component {
             );
           })}
         </ScrollView>
-        {isDragging ? <SelectedPhoto selectedPhoto={selectedPhoto} /> : null}
+        {isDragging
+          ? <SelectedPhoto
+            key={selectedPhoto ? selectedPhoto.photoURI : ''}
+            selectedPhoto={selectedPhoto}
+          />
+          : null}
       </View>
     );
   }

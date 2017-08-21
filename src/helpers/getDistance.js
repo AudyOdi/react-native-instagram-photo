@@ -9,7 +9,9 @@ export function pow2abs(a: number, b: number) {
 function getDistance(touches: Array<Touch>) {
   const a = touches[0];
   const b = touches[1];
-
+  if (a == null || b == null) {
+    return 0;
+  }
   return Math.sqrt(pow2abs(a.pageX, b.pageX) + pow2abs(a.pageY, b.pageY));
 }
 
