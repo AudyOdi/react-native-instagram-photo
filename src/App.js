@@ -21,16 +21,6 @@ let photos = [
     },
   },
   {
-    name: 'Simon Sturmer',
-    avatar: {
-      uri: `https://cdn-images-1.medium.com/fit/c/200/200/0*fGMlNbNmb01G7gpv.jpeg`,
-    },
-    photo: {
-      uri:
-        'https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F32179220%2F214666330784%2F1%2Foriginal.jpg?w=1000&rect=357%2C293%2C2326%2C1163&s=6ccee5095fbfd4a7b9aead2c2d355e3d',
-    },
-  },
-  {
     name: 'Katelyn Friedson',
     avatar: {
       uri: 'https://s3.amazonaws.com/uifaces/faces/twitter/kfriedson/128.jpg',
@@ -61,6 +51,16 @@ let photos = [
         'https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F31079558%2F50958620730%2F1%2Foriginal.jpg?w=1000&rect=148%2C418%2C2360%2C1180&s=2f48e3d424143273cb5f98a7342bd1ee',
     },
   },
+  {
+    name: 'Other',
+    avatar: {
+      uri: `https://www.mautic.org/media/images/default_avatar.png`,
+    },
+    photo: {
+      uri:
+        'https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F32179220%2F214666330784%2F1%2Foriginal.jpg?w=1000&rect=357%2C293%2C2326%2C1163&s=6ccee5095fbfd4a7b9aead2c2d355e3d',
+    },
+  },
 ];
 
 type SelectedPhotoType = {photoURI: string; measurement: Measurement};
@@ -89,7 +89,7 @@ export default class App extends React.Component {
 
   static childContextTypes = {
     gesturePosition: PropTypes.object,
-    scrollValue: PropTypes.object,
+    getScrollValue: PropTypes.func,
     scaleValue: PropTypes.object,
   };
 
@@ -97,7 +97,9 @@ export default class App extends React.Component {
     return {
       gesturePosition: this._gesturePosition,
       scaleValue: this._scaleValue,
-      scrollValue: this._scrollValue,
+      getScrollValue: () => {
+        return this._scrollValue.__getValue();
+      },
     };
   }
 
@@ -145,6 +147,6 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 20,
+    marginTop: 20, // for status bar
   },
 });

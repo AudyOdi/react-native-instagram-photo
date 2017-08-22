@@ -54,8 +54,8 @@ export default class SelectedPhoto extends Component {
       animatedStyle,
     ];
 
-    let opacityValue = scaleValue.interpolate({
-      inputRange: [1.2, 2.5],
+    let backgroundOpacityValue = scaleValue.interpolate({
+      inputRange: [1.2, 3],
       outputRange: [0, 0.6],
     });
 
@@ -63,9 +63,9 @@ export default class SelectedPhoto extends Component {
       <View style={styles.root}>
         <Animated.View
           style={[
-            styles.backdrop,
+            styles.background,
             {
-              opacity: opacityValue,
+              opacity: backgroundOpacityValue,
             },
           ]}
         />
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
   },
-  backdrop: {
+  background: {
     position: 'absolute',
     top: 0,
     left: 0,

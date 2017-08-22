@@ -1,25 +1,21 @@
 // @flow
+/* global requestAnimationFrame */
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import autobind from 'class-autobind';
-import FlexImage from 'react-native-flex-image';
-import ReactNative, {
-  View,
-  UIManager,
-  Animated,
-  PanResponder,
-  Easing,
-} from 'react-native';
+import ReactNative, {View, Animated, PanResponder, Easing} from 'react-native';
 import {ListItem} from 'react-native-elements';
+import FlexImage from 'react-native-flex-image';
 
 import getDistance from './helpers/getDistance';
+import getScale from './helpers/getScale';
+import measureNode from './helpers/measureNode';
 
 import type {Measurement} from './Measurement-type';
 import type {Touch} from './Touch-type';
 
 const RESTORE_ANIMATION_DURATION = 200;
-const SCALE_MULTIPLIER = 1.2;
 
 type Event = {
   nativeEvent: {
@@ -51,16 +47,11 @@ type Props = {
 type Context = {
   gesturePosition: Animated.ValueXY;
   scaleValue: Animated.Value;
-  scrollValue: Animated.Value;
-};
-
-type State = {
-  isDragging: boolean;
+  getScrollValue: () => number;
 };
 
 export default class PhotoComponent extends Component {
   props: Props;
-  state: State;
   context: Context;
   _parent: ?Object;
   _photoComponent: ?Object;
@@ -73,8 +64,8 @@ export default class PhotoComponent extends Component {
 
   static contextTypes = {
     gesturePosition: PropTypes.object,
-    scrollValue: PropTypes.object,
     scaleValue: PropTypes.object,
+    getScrollValue: PropTypes.func,
   };
 
   constructor() {
@@ -83,10 +74,6 @@ export default class PhotoComponent extends Component {
 
     this._generatePanHandlers();
     this._initialTouches = [];
-    this.state = {
-      isDragging: false,
-    };
-
     this._opacity = new Animated.Value(1);
   }
 
@@ -94,7 +81,7 @@ export default class PhotoComponent extends Component {
     let {data} = this.props;
 
     return (
-      <View ref={(parent) => (this._parent = parent)}>
+      <View ref={(parentNode) => (this._parent = parentNode)}>
         <View>
           <ListItem
             roundAvatar
@@ -132,19 +119,16 @@ export default class PhotoComponent extends Component {
   }
 
   async _startGesture(event: Event, gestureState: GestureState) {
-    console.log('Gesture Start', gestureState.stateID);
     // Sometimes gesture start happens two or more times rapidly.
     if (this._gestureInProgress) {
       return;
     }
+
     this._gestureInProgress = gestureState.stateID;
     let {data, onGestureStart} = this.props;
-    let {gesturePosition} = this.context;
+    let {gesturePosition, getScrollValue} = this.context;
     let {touches} = event.nativeEvent;
 
-    // if (touches.length !== 2) {
-    //   return;
-    // }
     this._initialTouches = touches;
 
     let selectedPhotoMeasurement = await this._measureSelectedPhoto();
@@ -161,18 +145,17 @@ export default class PhotoComponent extends Component {
 
     gesturePosition.setOffset({
       x: 0,
-      y: selectedPhotoMeasurement.y - this._getScrollValue(),
+      y: selectedPhotoMeasurement.y - getScrollValue(),
     });
 
     Animated.timing(this._opacity, {
       toValue: 0,
-      duration: 100,
+      duration: 200,
     }).start();
   }
 
   _onGestureMove(event: Event, gestureState: GestureState) {
     let {touches} = event.nativeEvent;
-    console.log('Gesture Move', touches.length);
     if (!this._gestureInProgress) {
       return;
     }
@@ -181,12 +164,6 @@ export default class PhotoComponent extends Component {
       this._onGestureRelease(event, gestureState);
       return;
     }
-    // if (this._initialTouches.length !== touches.length) {
-    //   this._initialTouches = touches;
-    // }
-    // if (!isDragging) {
-    //   this._startGesture(event);
-    // }
 
     // for moving photo around
     let {gesturePosition, scaleValue} = this.context;
@@ -197,19 +174,19 @@ export default class PhotoComponent extends Component {
     // for scaling photo
     let currentDistance = getDistance(touches);
     let initialDistance = getDistance(this._initialTouches);
-    let newScale = currentDistance / initialDistance * SCALE_MULTIPLIER;
+    let newScale = getScale(currentDistance, initialDistance);
     scaleValue.setValue(newScale);
   }
 
   _onGestureRelease(event, gestureState: GestureState) {
-    console.log('Gesture Release', gestureState.stateID);
     if (this._gestureInProgress !== gestureState.stateID) {
       return;
     }
+
     this._gestureInProgress = null;
     this._initialTouches = [];
     let {onGestureRelease} = this.props;
-    let {gesturePosition, scaleValue} = this.context;
+    let {gesturePosition, scaleValue, getScrollValue} = this.context;
 
     // set to initial position and scale
     Animated.parallel([
@@ -217,19 +194,19 @@ export default class PhotoComponent extends Component {
         toValue: 0,
         duration: RESTORE_ANIMATION_DURATION,
         easing: Easing.ease,
-        useNativeDriver: true,
+        // useNativeDriver: true,
       }),
       Animated.timing(gesturePosition.y, {
         toValue: 0,
         duration: RESTORE_ANIMATION_DURATION,
         easing: Easing.ease,
-        useNativeDriver: true,
+        // useNativeDriver: true,
       }),
       Animated.timing(scaleValue, {
         toValue: 1,
         duration: RESTORE_ANIMATION_DURATION,
         easing: Easing.ease,
-        useNativeDriver: true,
+        // useNativeDriver: true,
       }),
     ]).start(() => {
       gesturePosition.setOffset({
@@ -237,23 +214,15 @@ export default class PhotoComponent extends Component {
         y:
           (this._selectedPhotoMeasurement &&
             this._selectedPhotoMeasurement.y) ||
-          0 - this._getScrollValue(),
+          0 - getScrollValue(),
       });
-      this._opacity.setValue(1);
-      // Animated.timing(this._opacity, {
-      //   toValue: 1,
-      //   duration: 100,
-      // }).start();
-      // this.setState({isDragging: false});
-      // hacky solution to prevent lagging when unmounting the selected photo
-      setTimeout(() => {
-        onGestureRelease();
-      }, 1);
-    });
-  }
 
-  _getScrollValue() {
-    return this.context.scrollValue.__getValue();
+      this._opacity.setValue(1);
+
+      requestAnimationFrame(() => {
+        onGestureRelease();
+      });
+    });
   }
 
   async _measureSelectedPhoto() {
@@ -272,16 +241,4 @@ export default class PhotoComponent extends Component {
       h: photoMeasurement.h,
     };
   }
-}
-
-function measureNode(node) {
-  return new Promise((resolve, reject) => {
-    UIManager.measureLayoutRelativeToParent(
-      node,
-      (e) => reject(e),
-      (x, y, w, h) => {
-        resolve({x, y, w, h});
-      }
-    );
-  });
 }
