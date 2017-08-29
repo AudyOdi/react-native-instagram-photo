@@ -115,6 +115,12 @@ export default class PhotoComponent extends Component {
       onPanResponderGrant: this._startGesture,
       onPanResponderMove: this._onGestureMove,
       onPanResponderRelease: this._onGestureRelease,
+      onPanResponderTerminationRequest: () => {
+        return this._gestureInProgress == null;
+      },
+      onPanResponderTerminate: (event, gestureState) => {
+        return this._onGestureRelease(event, gestureState);
+      },
     });
   }
 
