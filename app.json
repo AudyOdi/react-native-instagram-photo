@@ -1,5 +1,8 @@
 {
   "expo": {
-    "sdkVersion": "19.0.0"
+    "name": "Instagram Zoom-Draggable Photo with React Native",
+    "sdkVersion": "19.0.0",
+    "slug": "react-native-instagram-photo",
+    "orientation": "portrait"
   }
 }
