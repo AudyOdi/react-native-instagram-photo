@@ -47,7 +47,7 @@ type Props = {
 type Context = {
   gesturePosition: Animated.ValueXY;
   scaleValue: Animated.Value;
-  getScrollValue: () => number;
+  getScrollPosition: () => number;
 };
 
 export default class PhotoComponent extends Component {
@@ -65,7 +65,7 @@ export default class PhotoComponent extends Component {
   static contextTypes = {
     gesturePosition: PropTypes.object,
     scaleValue: PropTypes.object,
-    getScrollValue: PropTypes.func,
+    getScrollPosition: PropTypes.func,
   };
 
   constructor() {
@@ -132,7 +132,7 @@ export default class PhotoComponent extends Component {
 
     this._gestureInProgress = gestureState.stateID;
     let {data, onGestureStart} = this.props;
-    let {gesturePosition, getScrollValue} = this.context;
+    let {gesturePosition, getScrollPosition} = this.context;
     let {touches} = event.nativeEvent;
 
     this._initialTouches = touches;
@@ -151,7 +151,7 @@ export default class PhotoComponent extends Component {
 
     gesturePosition.setOffset({
       x: 0,
-      y: selectedPhotoMeasurement.y - getScrollValue(),
+      y: selectedPhotoMeasurement.y - getScrollPosition(),
     });
 
     Animated.timing(this._opacity, {
@@ -192,7 +192,7 @@ export default class PhotoComponent extends Component {
     this._gestureInProgress = null;
     this._initialTouches = [];
     let {onGestureRelease} = this.props;
-    let {gesturePosition, scaleValue, getScrollValue} = this.context;
+    let {gesturePosition, scaleValue, getScrollPosition} = this.context;
 
     // set to initial position and scale
     Animated.parallel([
@@ -220,7 +220,7 @@ export default class PhotoComponent extends Component {
         y:
           (this._selectedPhotoMeasurement &&
             this._selectedPhotoMeasurement.y) ||
-          0 - getScrollValue(),
+          0 - getScrollPosition(),
       });
 
       this._opacity.setValue(1);

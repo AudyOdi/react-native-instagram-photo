@@ -89,7 +89,7 @@ export default class App extends React.Component {
 
   static childContextTypes = {
     gesturePosition: PropTypes.object,
-    getScrollValue: PropTypes.func,
+    getScrollPosition: PropTypes.func,
     scaleValue: PropTypes.object,
   };
 
@@ -97,7 +97,7 @@ export default class App extends React.Component {
     return {
       gesturePosition: this._gesturePosition,
       scaleValue: this._scaleValue,
-      getScrollValue: () => {
+      getScrollPosition: () => {
         return this._scrollValue.__getValue();
       },
     };
@@ -133,12 +133,12 @@ export default class App extends React.Component {
             );
           })}
         </ScrollView>
-        {isDragging
-          ? <SelectedPhoto
+        {isDragging ? (
+          <SelectedPhoto
             key={selectedPhoto ? selectedPhoto.photoURI : ''}
             selectedPhoto={selectedPhoto}
           />
-          : null}
+        ) : null}
       </View>
     );
   }
